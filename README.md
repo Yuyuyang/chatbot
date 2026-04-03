@@ -33,6 +33,7 @@
   - [Vercel Blob](https://vercel.com/storage/blob) for efficient file storage
 - [Auth.js](https://authjs.dev)
   - Simple and secure authentication
+  - This fork requires an authenticated account before chat pages or chat APIs can be used
 
 ## Model Providers
 
@@ -112,6 +113,16 @@ See [.env.example](.env.example) and [`specs/openai-compatible-provider/model-li
 You can deploy your own version of Chatbot to Vercel with one click:
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/templates/next.js/chatbot)
+
+## Authentication behavior
+
+This fork no longer auto-creates guest sessions for anonymous visitors.
+
+- Unauthenticated page requests are redirected to `/login`
+- Unauthenticated protected API requests return `401`
+- After login or registration, the app safely redirects back to the requested page when `redirectUrl` is valid
+
+The Auth.js route base remains `/api/auth`, configured in `app/(auth)/auth.config.ts`, and the entry protection is implemented through the root `proxy.ts` file convention used by Next.js 16.
 
 ## Running locally
 

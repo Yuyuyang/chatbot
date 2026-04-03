@@ -1,18 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import { AuthForm } from "@/components/chat/auth-form";
 import { SubmitButton } from "@/components/chat/submit-button";
 import { toast } from "@/components/chat/toast";
+import { getSafeRedirectUrl } from "@/lib/auth/redirect";
 import { type RegisterActionState, register } from "../actions";
 
 export default function Page() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [isSuccessful, setIsSuccessful] = useState(false);
+  const redirectUrl = useMemo(
+    () => getSafeRedirectUrl(searchParams.get("redirectUrl")),
+    [searchParams]
+  );
+  const loginHref =
+    redirectUrl === "/"
+      ? "/login"
+      : `/login?redirectUrl=${encodeURIComponent(redirectUrl)}`;
 
   const [state, formAction] = useActionState<RegisterActionState, FormData>(
     register,
@@ -35,13 +45,16 @@ export default function Page() {
     } else if (state.status === "success") {
       toast({ type: "success", description: "Account created!" });
       setIsSuccessful(true);
-      updateSession();
-      router.refresh();
+      const target = state.redirectTo ?? redirectUrl;
+      void updateSession().finally(() => {
+        router.replace(target);
+      });
     }
-  }, [state.status]);
+  }, [redirectUrl, router, state.redirectTo, state.status, updateSession]);
 
   const handleSubmit = (formData: FormData) => {
     setEmail(formData.get("email") as string);
+    formData.set("redirectUrl", redirectUrl);
     formAction(formData);
   };
 
@@ -55,7 +68,7 @@ export default function Page() {
           {"Have an account? "}
           <Link
             className="text-foreground underline-offset-4 hover:underline"
-            href="/login"
+            href={loginHref}
           >
             Sign in
           </Link>

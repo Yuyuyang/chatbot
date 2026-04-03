@@ -1,9 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { guestRegex, isDevelopmentEnvironment } from "./lib/constants";
+import { getSafeRedirectUrl } from "./lib/auth/redirect";
+import { isDevelopmentEnvironment } from "./lib/constants";
+import { ChatbotError } from "./lib/errors";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
   if (pathname.startsWith("/ping")) {
     return new Response("pong", { status: 200 });
@@ -19,20 +22,38 @@ export async function proxy(request: NextRequest) {
     secureCookie: !isDevelopmentEnvironment,
   });
 
-  const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+  const isAuthPage = ["/login", "/register"].includes(pathname);
+  const isApiRoute = pathname.startsWith("/api/");
 
   if (!token) {
-    const redirectUrl = encodeURIComponent(new URL(request.url).pathname);
+    if (isAuthPage) {
+      return NextResponse.next();
+    }
+
+    if (isApiRoute) {
+      return new ChatbotError("unauthorized:auth").toResponse();
+    }
+
+    const redirectUrl = getSafeRedirectUrl(
+      `${request.nextUrl.pathname}${request.nextUrl.search}`
+    );
 
     return NextResponse.redirect(
-      new URL(`${base}/api/auth/guest?redirectUrl=${redirectUrl}`, request.url)
+      new URL(
+        `${base}/login?redirectUrl=${encodeURIComponent(redirectUrl)}`,
+        request.url
+      )
     );
   }
 
-  const isGuest = guestRegex.test(token?.email ?? "");
+  if (isAuthPage) {
+    const redirectUrl = getSafeRedirectUrl(
+      request.nextUrl.searchParams.get("redirectUrl")
+    );
 
-  if (token && !isGuest && ["/login", "/register"].includes(pathname)) {
-    return NextResponse.redirect(new URL(`${base}/`, request.url));
+    return NextResponse.redirect(
+      new URL(redirectUrl === "/" ? `${base}/` : redirectUrl, request.url)
+    );
   }
 
   return NextResponse.next();

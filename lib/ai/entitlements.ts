@@ -5,6 +5,7 @@ type Entitlements = {
 };
 
 export const entitlementsByUserType: Record<UserType, Entitlements> = {
+  // Kept for compatibility with historical sessions/data.
   guest: {
     maxMessagesPerHour: 10,
   },

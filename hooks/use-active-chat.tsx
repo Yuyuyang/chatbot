@@ -20,6 +20,7 @@ import { unstable_serialize } from "swr/infinite";
 import { useDataStream } from "@/components/chat/data-stream-provider";
 import { getChatHistoryPaginationKey } from "@/components/chat/sidebar-history";
 import { toast } from "@/components/chat/toast";
+import { getSafeRedirectUrl } from "@/lib/auth/redirect";
 import type { VisibilityType } from "@/components/chat/visibility-selector";
 import { useAutoResume } from "@/hooks/use-auto-resume";
 import type { Vote } from "@/lib/db/schema";
@@ -81,7 +82,7 @@ export function ActiveChatProvider({ children }: { children: ReactNode }) {
   const [input, setInput] = useState("");
   const [showCreditCardAlert, setShowCreditCardAlert] = useState(false);
 
-  const { data: chatData, isLoading } = useSWR(
+  const { data: chatData, error: chatError, isLoading } = useSWR(
     isNewChat
       ? null
       : `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/messages?chatId=${chatId}`,
@@ -157,7 +158,20 @@ export function ActiveChatProvider({ children }: { children: ReactNode }) {
       mutate(unstable_serialize(getChatHistoryPaginationKey));
     },
     onError: (error) => {
-      if (error.message?.includes("AI Gateway requires a valid credit card")) {
+      if (
+        error instanceof ChatbotError &&
+        error.type === "unauthorized"
+      ) {
+        const redirectUrl = getSafeRedirectUrl(
+          `${window.location.pathname}${window.location.search}`
+        );
+
+        window.location.assign(
+          `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/login?redirectUrl=${encodeURIComponent(redirectUrl)}`
+        );
+      } else if (
+        error.message?.includes("AI Gateway requires a valid credit card")
+      ) {
         setShowCreditCardAlert(true);
       } else if (error instanceof ChatbotError) {
         toast({ type: "error", description: error.message });
@@ -224,6 +238,20 @@ export function ActiveChatProvider({ children }: { children: ReactNode }) {
       });
     }
   }, [sendMessage, chatId]);
+
+  useEffect(() => {
+    if (!(chatError instanceof ChatbotError) || chatError.type !== "unauthorized") {
+      return;
+    }
+
+    const redirectUrl = getSafeRedirectUrl(
+      `${window.location.pathname}${window.location.search}`
+    );
+
+    window.location.assign(
+      `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/login?redirectUrl=${encodeURIComponent(redirectUrl)}`
+    );
+  }, [chatError]);
 
   useAutoResume({
     autoResume: !isNewChat && !!chatData,

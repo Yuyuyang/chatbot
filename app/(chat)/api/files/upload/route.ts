@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { auth } from "@/app/(auth)/auth";
+import { ChatbotError } from "@/lib/errors";
 
 const FileSchema = z.object({
   file: z
@@ -18,8 +19,8 @@ const FileSchema = z.object({
 export async function POST(request: Request) {
   const session = await auth();
 
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user) {
+    return new ChatbotError("unauthorized:auth").toResponse();
   }
 
   if (request.body === null) {

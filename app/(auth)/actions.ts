@@ -3,6 +3,7 @@
 import { z } from "zod";
 
 import { createUser, getUser } from "@/lib/db/queries";
+import { getSafeRedirectUrl } from "@/lib/auth/redirect";
 
 import { signIn } from "./auth";
 
@@ -13,6 +14,7 @@ const authFormSchema = z.object({
 
 export type LoginActionState = {
   status: "idle" | "in_progress" | "success" | "failed" | "invalid_data";
+  redirectTo?: string;
 };
 
 export const login = async (
@@ -31,7 +33,12 @@ export const login = async (
       redirect: false,
     });
 
-    return { status: "success" };
+    return {
+      status: "success",
+      redirectTo: getSafeRedirectUrl(
+        formData.get("redirectUrl")?.toString() ?? null
+      ),
+    };
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { status: "invalid_data" };
@@ -49,6 +56,7 @@ export type RegisterActionState = {
     | "failed"
     | "user_exists"
     | "invalid_data";
+  redirectTo?: string;
 };
 
 export const register = async (
@@ -73,7 +81,12 @@ export const register = async (
       redirect: false,
     });
 
-    return { status: "success" };
+    return {
+      status: "success",
+      redirectTo: getSafeRedirectUrl(
+        formData.get("redirectUrl")?.toString() ?? null
+      ),
+    };
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { status: "invalid_data" };
