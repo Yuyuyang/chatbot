@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { Suspense, useActionState, useEffect, useMemo, useState } from "react";
 
 import { AuthForm } from "@/components/chat/auth-form";
 import { SubmitButton } from "@/components/chat/submit-button";
@@ -11,7 +11,7 @@ import { toast } from "@/components/chat/toast";
 import { getSafeRedirectUrl } from "@/lib/auth/redirect";
 import { type LoginActionState, login } from "../actions";
 
-export default function Page() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
@@ -75,5 +75,13 @@ export default function Page() {
         </p>
       </AuthForm>
     </>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div className="min-h-[240px]" />}>
+      <LoginPageContent />
+    </Suspense>
   );
 }
