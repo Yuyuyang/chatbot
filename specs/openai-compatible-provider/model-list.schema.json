@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chatbox.local/specs/openai-compatible-provider/model-list.schema.json",
+  "title": "MODEL_LIST",
+  "description": "JSON schema for the MODEL_LIST environment variable. MODEL_LIST must be a JSON array string whose parsed value matches this schema.",
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "$ref": "#/$defs/model"
+  },
+  "$defs": {
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "provider",
+        "capabilities"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The exact model identifier sent to the upstream OpenAI-compatible API."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Display name shown in the UI."
+        },
+        "provider": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[a-z0-9-]+$",
+          "description": "UI-only provider/group identifier. Does not control routing."
+        },
+        "description": {
+          "type": "string",
+          "default": "",
+          "description": "Optional model description for the selector UI."
+        },
+        "capabilities": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "tools",
+            "vision",
+            "reasoning"
+          ],
+          "properties": {
+            "tools": {
+              "type": "boolean",
+              "description": "Whether the model supports tool calling."
+            },
+            "vision": {
+              "type": "boolean",
+              "description": "Whether the model supports image inputs."
+            },
+            "reasoning": {
+              "type": "boolean",
+              "description": "Whether the model should be treated as a reasoning model in app behavior/UI."
+            },
+            "structuredOutputs": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether the model/provider combination is suitable for structured outputs."
+            }
+          }
+        },
+        "providerOptions": {
+          "type": "object",
+          "default": {},
+          "description": "Optional provider-specific request options injected into providerOptions.<providerNameCamelCase>."
+        }
+      }
+    }
+  }
+}

@@ -3,13 +3,7 @@
 import type { UseChatHelpers } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
 import equal from "fast-deep-equal";
-import {
-  ArrowUpIcon,
-  BrainIcon,
-  EyeIcon,
-  LockIcon,
-  WrenchIcon,
-} from "lucide-react";
+import { ArrowUpIcon, BrainIcon, EyeIcon, WrenchIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import {
@@ -38,8 +32,6 @@ import {
 } from "@/components/ai-elements/model-selector";
 import {
   type ChatModel,
-  chatModels,
-  DEFAULT_CHAT_MODEL,
   type ModelCapabilities,
 } from "@/lib/ai/models";
 import type { Attachment, ChatMessage } from "@/lib/types";
@@ -641,15 +633,25 @@ function PureModelSelectorCompact({
   );
 
   const capabilities: Record<string, ModelCapabilities> | undefined =
-    modelsData?.capabilities ?? modelsData;
-  const dynamicModels: ChatModel[] | undefined = modelsData?.models;
-  const activeModels = dynamicModels ?? chatModels;
-
+    modelsData?.capabilities;
+  const activeModels: ChatModel[] = modelsData?.models ?? [];
+  const fallbackModel =
+    activeModels.find(
+      (model: ChatModel) => model.id === modelsData?.defaultModelId
+    ) ?? activeModels[0];
   const selectedModel =
-    activeModels.find((m: ChatModel) => m.id === selectedModelId) ??
-    activeModels.find((m: ChatModel) => m.id === DEFAULT_CHAT_MODEL) ??
-    activeModels[0];
-  const [provider] = selectedModel.id.split("/");
+    activeModels.find((model: ChatModel) => model.id === selectedModelId) ??
+    fallbackModel;
+  const provider =
+    selectedModel?.provider ?? selectedModel?.id.split("/")[0] ?? "";
+
+  useEffect(() => {
+    if (!selectedModel?.id || selectedModel.id === selectedModelId) {
+      return;
+    }
+
+    onModelChange?.(selectedModel.id);
+  }, [onModelChange, selectedModel?.id, selectedModelId]);
 
   return (
     <ModelSelector onOpenChange={setOpen} open={open}>
@@ -659,45 +661,29 @@ function PureModelSelectorCompact({
           data-testid="model-selector"
           variant="ghost"
         >
-          {provider && <ModelSelectorLogo provider={provider} />}
-          <ModelSelectorName>{selectedModel.name}</ModelSelectorName>
+          {provider ? <ModelSelectorLogo provider={provider} /> : null}
+          <ModelSelectorName>
+            {selectedModel?.name ?? "Loading models..."}
+          </ModelSelectorName>
         </Button>
       </ModelSelectorTrigger>
       <ModelSelectorContent>
         <ModelSelectorInput placeholder="Search models..." />
         <ModelSelectorList>
           {(() => {
-            const curatedIds = new Set(chatModels.map((m) => m.id));
-            const allModels = dynamicModels
-              ? [
-                  ...chatModels,
-                  ...dynamicModels.filter((m) => !curatedIds.has(m.id)),
-                ]
-              : chatModels;
+            const grouped: Record<string, ChatModel[]> = {};
 
-            const grouped: Record<
-              string,
-              { model: ChatModel; curated: boolean }[]
-            > = {};
-            for (const model of allModels) {
-              const key = curatedIds.has(model.id)
-                ? "_available"
-                : model.provider;
+            for (const model of activeModels) {
+              const key = model.provider;
               if (!grouped[key]) {
                 grouped[key] = [];
               }
-              grouped[key].push({ model, curated: curatedIds.has(model.id) });
+              grouped[key].push(model);
             }
 
-            const sortedKeys = Object.keys(grouped).sort((a, b) => {
-              if (a === "_available") {
-                return -1;
-              }
-              if (b === "_available") {
-                return 1;
-              }
-              return a.localeCompare(b);
-            });
+            const sortedKeys = Object.keys(grouped).sort((a, b) =>
+              a.localeCompare(b)
+            );
 
             const providerNames: Record<string, string> = {
               alibaba: "Alibaba",
@@ -726,28 +712,20 @@ function PureModelSelectorCompact({
 
             return sortedKeys.map((key) => (
               <ModelSelectorGroup
-                heading={
-                  key === "_available"
-                    ? "Available"
-                    : (providerNames[key] ?? key)
-                }
+                heading={providerNames[key] ?? key}
                 key={key}
               >
-                {grouped[key].map(({ model, curated }) => {
-                  const logoProvider = model.id.split("/")[0];
+                {grouped[key].map((model) => {
+                  const logoProvider = model.provider || model.id.split("/")[0];
                   return (
                     <ModelSelectorItem
                       className={cn(
                         "flex w-full",
                         model.id === selectedModel.id &&
-                          "border-b border-dashed border-foreground/50",
-                        !curated && "opacity-40 cursor-default"
+                          "border-b border-dashed border-foreground/50"
                       )}
                       key={model.id}
                       onSelect={() => {
-                        if (!curated) {
-                          return;
-                        }
                         onModelChange?.(model.id);
                         setCookie("chat-model", model.id);
                         setOpen(false);
@@ -772,9 +750,6 @@ function PureModelSelectorCompact({
                         )}
                         {capabilities?.[model.id]?.reasoning && (
                           <BrainIcon className="size-3.5" />
-                        )}
-                        {!curated && (
-                          <LockIcon className="size-3 text-muted-foreground/50" />
                         )}
                       </div>
                     </ModelSelectorItem>

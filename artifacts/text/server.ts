@@ -1,6 +1,9 @@
 import { smoothStream, streamText } from "ai";
 import { updateDocumentPrompt } from "@/lib/ai/prompts";
-import { getLanguageModel } from "@/lib/ai/providers";
+import {
+  getLanguageModel,
+  getModelRequestProviderOptions,
+} from "@/lib/ai/providers";
 import { createDocumentHandler } from "@/lib/artifacts/server";
 
 export const textDocumentHandler = createDocumentHandler<"text">({
@@ -14,6 +17,9 @@ export const textDocumentHandler = createDocumentHandler<"text">({
         "Write about the given topic. Markdown is supported. Use headings wherever appropriate.",
       experimental_transform: smoothStream({ chunking: "word" }),
       prompt: title,
+      ...(getModelRequestProviderOptions(modelId) && {
+        providerOptions: getModelRequestProviderOptions(modelId),
+      }),
     });
 
     for await (const delta of fullStream) {
@@ -37,6 +43,9 @@ export const textDocumentHandler = createDocumentHandler<"text">({
       system: updateDocumentPrompt(document.content, "text"),
       experimental_transform: smoothStream({ chunking: "word" }),
       prompt: description,
+      ...(getModelRequestProviderOptions(modelId) && {
+        providerOptions: getModelRequestProviderOptions(modelId),
+      }),
     });
 
     for await (const delta of fullStream) {
