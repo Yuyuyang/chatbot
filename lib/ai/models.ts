@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { isTestEnvironment } from "../constants";
 
+type JsonPrimitive = string | number | boolean | null;
+type JsonValue = JsonPrimitive | JsonObject | JsonValue[];
+type JsonObject = { [key: string]: JsonValue };
+
 type ModelCapabilities = {
   tools: boolean;
   vision: boolean;
@@ -14,7 +18,7 @@ type ChatModel = {
   provider: string;
   description: string;
   capabilities: ModelCapabilities;
-  providerOptions?: Record<string, unknown>;
+  providerOptions?: JsonObject;
 };
 
 const fallbackTestModels: ChatModel[] = [
@@ -63,13 +67,26 @@ const modelCapabilitiesSchema = z.object({
   structuredOutputs: z.boolean().optional().default(false),
 });
 
+const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.null(),
+    z.array(jsonValueSchema),
+    z.record(jsonValueSchema),
+  ])
+);
+
+const jsonObjectSchema: z.ZodType<JsonObject> = z.record(jsonValueSchema);
+
 const chatModelSchema = z.object({
   id: z.string().trim().min(1),
   name: z.string().trim().min(1),
   provider: z.string().trim().min(1).regex(/^[a-z0-9-]+$/),
   description: z.string().default(""),
   capabilities: modelCapabilitiesSchema,
-  providerOptions: z.record(z.unknown()).optional(),
+  providerOptions: jsonObjectSchema.optional(),
 });
 
 const chatModelsSchema = z.array(chatModelSchema).min(1);

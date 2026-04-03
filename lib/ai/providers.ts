@@ -2,7 +2,12 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { customProvider } from "ai";
 import { isTestEnvironment } from "../constants";
 import { getOpenAICompatibleRuntimeConfig, getProviderOptionsKey } from "./provider-config";
-import { chatModels, getChatModelConfig, TITLE_MODEL_ID } from "./models";
+import {
+  chatModels,
+  type ChatModel,
+  getChatModelConfig,
+  TITLE_MODEL_ID,
+} from "./models";
 
 export const myProvider = isTestEnvironment
   ? (() => {
@@ -46,7 +51,7 @@ export function getModelRequestProviderOptions(modelId: string) {
     return undefined;
   }
 
-  const modelConfig = getChatModelConfig(modelId);
+  const modelConfig: ChatModel | undefined = getChatModelConfig(modelId);
 
   if (!modelConfig?.providerOptions) {
     return undefined;
