@@ -58,7 +58,7 @@ export function getModelRequestProviderOptions(modelId: string) {
   }
 
   const providerKey = getProviderOptionsKey(
-    getOpenAICompatibleRuntimeConfig().providerName
+    getOpenAICompatibleRuntimeConfig().name
   );
 
   return {

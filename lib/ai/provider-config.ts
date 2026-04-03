@@ -1,5 +1,5 @@
 type OpenAICompatibleRuntimeConfig = {
-  providerName: string;
+  name: string;
   baseURL: string;
   apiKey: string;
   headers?: Record<string, string>;
@@ -97,7 +97,7 @@ export function getOpenAICompatibleRuntimeConfig(): OpenAICompatibleRuntimeConfi
   }
 
   cachedConfig = {
-    providerName: requireNonEmptyEnv("OPENAI_COMPATIBLE_PROVIDER_NAME"),
+    name: requireNonEmptyEnv("OPENAI_COMPATIBLE_PROVIDER_NAME"),
     baseURL: requireNonEmptyEnv("OPENAI_COMPATIBLE_BASE_URL"),
     apiKey: requireNonEmptyEnv("OPENAI_COMPATIBLE_API_KEY"),
     headers: parseOptionalRecord(
