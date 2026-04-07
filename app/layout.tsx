@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Suspense } from "react";
 import { I18nProvider } from "@/components/providers/i18n-provider";
+import { I18nServerProvider } from "@/components/providers/i18n-server-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { getDictionary } from "@/lib/i18n/get-dictionary";
-import { getRequestLocale } from "@/lib/i18n/get-request-locale";
+import { DEFAULT_LOCALE } from "@/lib/i18n/config";
+import { enDictionary } from "@/lib/i18n/dictionaries/en";
 
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
@@ -51,18 +53,15 @@ const THEME_COLOR_SCRIPT = `\
   updateThemeColor();
 })();`;
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const locale = await getRequestLocale();
-  const dictionary = await getDictionary(locale);
-
   return (
     <html
       className={`${geist.variable} ${geistMono.variable}`}
-      lang={locale}
+      lang={DEFAULT_LOCALE}
       suppressHydrationWarning
     >
       <head>
@@ -74,20 +73,39 @@ export default async function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <I18nProvider dictionary={dictionary} locale={locale}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            disableTransitionOnChange
-            enableSystem
-          >
-            <SessionProvider
-              basePath={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/auth`}
+        <Suspense
+          fallback={
+            <I18nProvider dictionary={enDictionary} locale={DEFAULT_LOCALE}>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                disableTransitionOnChange
+                enableSystem
+              >
+                <SessionProvider
+                  basePath={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/auth`}
+                >
+                  <TooltipProvider>{children}</TooltipProvider>
+                </SessionProvider>
+              </ThemeProvider>
+            </I18nProvider>
+          }
+        >
+          <I18nServerProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              disableTransitionOnChange
+              enableSystem
             >
-              <TooltipProvider>{children}</TooltipProvider>
-            </SessionProvider>
-          </ThemeProvider>
-        </I18nProvider>
+              <SessionProvider
+                basePath={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/auth`}
+              >
+                <TooltipProvider>{children}</TooltipProvider>
+              </SessionProvider>
+            </ThemeProvider>
+          </I18nServerProvider>
+        </Suspense>
       </body>
     </html>
   );

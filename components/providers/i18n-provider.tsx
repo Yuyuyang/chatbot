@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useMemo } from "react";
+import { createContext, useContext, useEffect, useMemo } from "react";
 import { enDictionary } from "@/lib/i18n/dictionaries/en";
 import { getTranslation } from "@/lib/i18n/translate";
 import type { AppLocale } from "@/lib/i18n/config";
@@ -31,6 +31,10 @@ export function I18nProvider({
     }),
     [dictionary, locale]
   );
+
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
