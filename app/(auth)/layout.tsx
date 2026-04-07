@@ -1,18 +1,18 @@
+"use client";
+
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { SparklesIcon, VercelIcon } from "@/components/chat/icons";
 import { LanguageSelector } from "@/components/chat/language-selector";
 import { Preview } from "@/components/chat/preview";
-import { getDictionary } from "@/lib/i18n/get-dictionary";
-import { getRequestLocale } from "@/lib/i18n/get-request-locale";
+import { useI18n } from "@/hooks/use-i18n";
 
-export default async function AuthLayout({
+export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const locale = await getRequestLocale();
-  const dictionary = await getDictionary(locale);
+  const { t } = useI18n();
 
   return (
     <div className="flex h-dvh w-screen bg-sidebar">
@@ -23,7 +23,7 @@ export default async function AuthLayout({
             href="/"
           >
             <ArrowLeftIcon className="size-3.5 shrink-0" />
-            {dictionary.auth.back}
+            {t("auth.back")}
           </Link>
           <LanguageSelector />
         </div>
@@ -39,7 +39,7 @@ export default async function AuthLayout({
 
       <div className="hidden flex-1 flex-col overflow-hidden pl-12 xl:flex">
         <div className="flex items-center gap-1.5 pt-8 text-[13px] text-muted-foreground/50">
-          {dictionary.auth.poweredBy}
+          {t("auth.poweredBy")}
           <VercelIcon size={14} />
           <span className="font-medium text-muted-foreground">AI Gateway</span>
         </div>
