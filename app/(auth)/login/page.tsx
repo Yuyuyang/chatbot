@@ -8,10 +8,12 @@ import { Suspense, useActionState, useEffect, useMemo, useState } from "react";
 import { AuthForm } from "@/components/chat/auth-form";
 import { SubmitButton } from "@/components/chat/submit-button";
 import { toast } from "@/components/chat/toast";
+import { useI18n } from "@/hooks/use-i18n";
 import { getSafeRedirectUrl } from "@/lib/auth/redirect";
 import { type LoginActionState, login } from "../actions";
 
 function LoginPageContent() {
+  const { t } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
@@ -35,11 +37,11 @@ function LoginPageContent() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: router and updateSession are stable refs
   useEffect(() => {
     if (state.status === "failed") {
-      toast({ type: "error", description: "Invalid credentials!" });
+      toast({ type: "error", description: t("auth.invalidCredentials") });
     } else if (state.status === "invalid_data") {
       toast({
         type: "error",
-        description: "Failed validating your submission!",
+        description: t("auth.failedValidation"),
       });
     } else if (state.status === "success") {
       setIsSuccessful(true);
@@ -48,7 +50,7 @@ function LoginPageContent() {
         router.replace(target);
       });
     }
-  }, [redirectUrl, router, state.redirectTo, state.status, updateSession]);
+  }, [redirectUrl, router, state.redirectTo, state.status, t, updateSession]);
 
   const handleSubmit = (formData: FormData) => {
     setEmail(formData.get("email") as string);
@@ -58,19 +60,23 @@ function LoginPageContent() {
 
   return (
     <>
-      <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">
+        {t("auth.welcomeBack")}
+      </h1>
       <p className="text-sm text-muted-foreground">
-        Sign in to your account to continue using chat
+        {t("auth.signInDescription")}
       </p>
       <AuthForm action={handleSubmit} defaultEmail={email}>
-        <SubmitButton isSuccessful={isSuccessful}>Sign in</SubmitButton>
+        <SubmitButton isSuccessful={isSuccessful}>
+          {t("auth.signIn")}
+        </SubmitButton>
         <p className="text-center text-[13px] text-muted-foreground">
-          {"No account? "}
+          {`${t("auth.noAccount")} `}
           <Link
             className="text-foreground underline-offset-4 hover:underline"
             href={registerHref}
           >
-            Sign up
+            {t("auth.signUp")}
           </Link>
         </p>
       </AuthForm>

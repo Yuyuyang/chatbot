@@ -1,5 +1,6 @@
 "use client";
 import type { UseChatHelpers } from "@ai-sdk/react";
+import { useI18n } from "@/hooks/use-i18n";
 import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
 import { cn, sanitizeText } from "@/lib/utils";
@@ -44,6 +45,7 @@ const PurePreviewMessage = ({
   requiresScrollPadding: boolean;
   onEdit?: (message: ChatMessage) => void;
 }) => {
+  const { t } = useI18n();
   const attachmentsFromMessage = message.parts.filter(
     (part) => part.type === "file"
   );
@@ -153,7 +155,7 @@ const PurePreviewMessage = ({
               <ToolHeader state="output-denied" type="tool-getWeather" />
               <ToolContent>
                 <div className="px-4 py-3 text-muted-foreground text-sm">
-                  Weather lookup was denied.
+                  {t("chat.tools.weatherLookupDenied")}
                 </div>
               </ToolContent>
             </Tool>
@@ -191,12 +193,12 @@ const PurePreviewMessage = ({
                       addToolApprovalResponse({
                         id: approvalId,
                         approved: false,
-                        reason: "User denied weather lookup",
+                        reason: t("chat.tools.userDeniedWeatherLookup"),
                       });
                     }}
                     type="button"
                   >
-                    Deny
+                    {t("common.action.deny")}
                   </button>
                   <button
                     className="rounded-md bg-primary px-3 py-1.5 text-primary-foreground text-sm transition-colors hover:bg-primary/90"
@@ -208,7 +210,7 @@ const PurePreviewMessage = ({
                     }}
                     type="button"
                   >
-                    Allow
+                    {t("common.action.allow")}
                   </button>
                 </div>
               )}
@@ -227,7 +229,7 @@ const PurePreviewMessage = ({
             className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-500 dark:bg-red-950/50"
             key={toolCallId}
           >
-            Error creating document: {String(part.output.error)}
+            {t("chat.tools.errorCreatingDocument")}: {String(part.output.error)}
           </div>
         );
       }
@@ -250,7 +252,7 @@ const PurePreviewMessage = ({
             className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-500 dark:bg-red-950/50"
             key={toolCallId}
           >
-            Error updating document: {String(part.output.error)}
+            {t("chat.tools.errorUpdatingDocument")}: {String(part.output.error)}
           </div>
         );
       }
@@ -284,7 +286,7 @@ const PurePreviewMessage = ({
                 output={
                   "error" in part.output ? (
                     <div className="rounded border p-2 text-red-500">
-                      Error: {String(part.output.error)}
+                      {t("chat.tools.error")}: {String(part.output.error)}
                     </div>
                   ) : (
                     <DocumentToolResult
@@ -318,7 +320,7 @@ const PurePreviewMessage = ({
   const content = isThinking ? (
     <div className="flex h-[calc(13px*1.65)] items-center text-[13px] leading-[1.65]">
       <Shimmer className="font-medium" duration={1}>
-        Thinking...
+        {t("chat.reasoning.thinking")}
       </Shimmer>
     </div>
   ) : (
@@ -363,6 +365,8 @@ const PurePreviewMessage = ({
 export const PreviewMessage = PurePreviewMessage;
 
 export const ThinkingMessage = () => {
+  const { t } = useI18n();
+
   return (
     <div
       className="group/message w-full"
@@ -378,7 +382,7 @@ export const ThinkingMessage = () => {
 
         <div className="flex h-[calc(13px*1.65)] items-center text-[13px] leading-[1.65]">
           <Shimmer className="font-medium" duration={1}>
-            Thinking...
+            {t("chat.reasoning.thinking")}
           </Shimmer>
         </div>
       </div>

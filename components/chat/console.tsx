@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import { useArtifactSelector } from "@/hooks/use-artifact";
+import { useI18n } from "@/hooks/use-i18n";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { Spinner } from "../ui/spinner";
@@ -29,6 +30,7 @@ type ConsoleProps = {
 };
 
 export function Console({ consoleOutputs, setConsoleOutputs }: ConsoleProps) {
+  const { t } = useI18n();
   const [height, setHeight] = useState<number>(300);
   const [isResizing, setIsResizing] = useState(false);
 
@@ -83,7 +85,7 @@ export function Console({ consoleOutputs, setConsoleOutputs }: ConsoleProps) {
   return consoleOutputs.length > 0 ? (
     <>
       <div
-        aria-label="Resize console"
+        aria-label={t("chat.console.resize")}
         aria-orientation="horizontal"
         aria-valuemax={maxHeight}
         aria-valuemin={minHeight}
@@ -113,7 +115,7 @@ export function Console({ consoleOutputs, setConsoleOutputs }: ConsoleProps) {
         <div className="sticky top-0 z-50 flex h-10 w-full items-center justify-between border-b border-border/50 bg-background px-3">
           <div className="flex items-center gap-2.5 text-[13px] text-muted-foreground">
             <TerminalWindowIcon />
-            <span>Console</span>
+            <span>{t("chat.console.title")}</span>
           </div>
           <Button
             className="size-7 text-muted-foreground/50 hover:text-foreground"
@@ -150,7 +152,7 @@ export function Console({ consoleOutputs, setConsoleOutputs }: ConsoleProps) {
                   <Spinner className="size-3.5" />
                   <span className="text-muted-foreground">
                     {consoleOutput.status === "in_progress"
-                      ? "Initializing..."
+                      ? t("common.action.loading")
                       : consoleOutput.status === "loading_packages"
                         ? consoleOutput.contents.map((content) =>
                             content.type === "text" ? content.value : null

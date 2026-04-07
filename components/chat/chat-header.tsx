@@ -4,6 +4,8 @@ import { PanelLeftIcon } from "lucide-react";
 import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/ui/sidebar";
+import { useI18n } from "@/hooks/use-i18n";
+import { LanguageSelector } from "./language-selector";
 import { VisibilitySelector, type VisibilityType } from "./visibility-selector";
 
 function PureChatHeader({
@@ -15,6 +17,7 @@ function PureChatHeader({
   selectedVisibilityType: VisibilityType;
   isReadonly: boolean;
 }) {
+  const { t } = useI18n();
   const { state, toggleSidebar, isMobile } = useSidebar();
 
   if (state === "collapsed" && !isMobile) {
@@ -24,6 +27,7 @@ function PureChatHeader({
   return (
     <header className="sticky top-0 flex h-14 items-center gap-2 bg-sidebar px-3">
       <Button
+        aria-label={t("chat.navigation.openSidebar")}
         className="md:hidden"
         onClick={toggleSidebar}
         size="icon-sm"
@@ -38,6 +42,10 @@ function PureChatHeader({
           selectedVisibilityType={selectedVisibilityType}
         />
       )}
+
+      <div className="ml-auto">
+        <LanguageSelector />
+      </div>
     </header>
   );
 }

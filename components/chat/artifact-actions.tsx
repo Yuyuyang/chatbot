@@ -1,9 +1,13 @@
 import { memo, useState } from "react";
 import { toast } from "sonner";
+import { useI18n } from "@/hooks/use-i18n";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { artifactDefinitions, type UIArtifact } from "./artifact";
-import type { ArtifactActionContext } from "./create-artifact";
+import type {
+  ArtifactActionContext,
+  LocalizedText,
+} from "./create-artifact";
 
 type ArtifactActionsProps = {
   artifact: UIArtifact;
@@ -25,6 +29,9 @@ function PureArtifactActions({
   setMetadata,
 }: ArtifactActionsProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const { t } = useI18n();
+  const resolveText = (text: LocalizedText) =>
+    typeof text === "function" ? text(t) : text;
 
   const artifactDefinition = artifactDefinitions.find(
     (definition) => definition.kind === artifact.kind
@@ -42,11 +49,13 @@ function PureArtifactActions({
     mode,
     metadata,
     setMetadata,
+    t,
   };
 
   return (
     <div className="flex flex-col items-center gap-0.5">
       {artifactDefinition.actions.map((action) => {
+        const description = resolveText(action.description);
         const disabled =
           isLoading || artifact.status === "streaming"
             ? true
@@ -55,7 +64,7 @@ function PureArtifactActions({
               : false;
 
         return (
-          <Tooltip key={action.description}>
+          <Tooltip key={action.id ?? description}>
             <TooltipTrigger asChild>
               <button
                 className={cn(
@@ -64,8 +73,7 @@ function PureArtifactActions({
                   "active:scale-95",
                   "disabled:pointer-events-none disabled:opacity-30",
                   {
-                    "text-foreground":
-                      mode === "diff" && action.description === "View changes",
+                    "text-foreground": mode === "diff" && action.id === "view-changes",
                   }
                 )}
                 disabled={disabled}
@@ -75,7 +83,7 @@ function PureArtifactActions({
                   try {
                     await Promise.resolve(action.onClick(actionContext));
                   } catch (_error) {
-                    toast.error("Failed to execute action");
+                    toast.error(t("chat.artifact.failedExecuteAction"));
                   } finally {
                     setIsLoading(false);
                   }
@@ -86,7 +94,7 @@ function PureArtifactActions({
               </button>
             </TooltipTrigger>
             <TooltipContent side="left" sideOffset={8}>
-              {action.description}
+              {description}
             </TooltipContent>
           </Tooltip>
         );

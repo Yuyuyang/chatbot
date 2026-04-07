@@ -7,10 +7,12 @@ import { Suspense, useActionState, useEffect, useMemo, useState } from "react";
 import { AuthForm } from "@/components/chat/auth-form";
 import { SubmitButton } from "@/components/chat/submit-button";
 import { toast } from "@/components/chat/toast";
+import { useI18n } from "@/hooks/use-i18n";
 import { getSafeRedirectUrl } from "@/lib/auth/redirect";
 import { type RegisterActionState, register } from "../actions";
 
 function RegisterPageContent() {
+  const { t } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
@@ -34,23 +36,23 @@ function RegisterPageContent() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: router and updateSession are stable refs
   useEffect(() => {
     if (state.status === "user_exists") {
-      toast({ type: "error", description: "Account already exists!" });
+      toast({ type: "error", description: t("auth.accountExists") });
     } else if (state.status === "failed") {
-      toast({ type: "error", description: "Failed to create account!" });
+      toast({ type: "error", description: t("auth.failedToCreateAccount") });
     } else if (state.status === "invalid_data") {
       toast({
         type: "error",
-        description: "Failed validating your submission!",
+        description: t("auth.failedValidation"),
       });
     } else if (state.status === "success") {
-      toast({ type: "success", description: "Account created!" });
+      toast({ type: "success", description: t("auth.accountCreated") });
       setIsSuccessful(true);
       const target = state.redirectTo ?? redirectUrl;
       void updateSession().finally(() => {
         router.replace(target);
       });
     }
-  }, [redirectUrl, router, state.redirectTo, state.status, updateSession]);
+  }, [redirectUrl, router, state.redirectTo, state.status, t, updateSession]);
 
   const handleSubmit = (formData: FormData) => {
     setEmail(formData.get("email") as string);
@@ -60,17 +62,23 @@ function RegisterPageContent() {
 
   return (
     <>
-      <h1 className="text-2xl font-semibold tracking-tight">Create account</h1>
-      <p className="text-sm text-muted-foreground">Get started for free</p>
+      <h1 className="text-2xl font-semibold tracking-tight">
+        {t("auth.createAccount")}
+      </h1>
+      <p className="text-sm text-muted-foreground">
+        {t("auth.getStartedForFree")}
+      </p>
       <AuthForm action={handleSubmit} defaultEmail={email}>
-        <SubmitButton isSuccessful={isSuccessful}>Sign up</SubmitButton>
+        <SubmitButton isSuccessful={isSuccessful}>
+          {t("auth.signUp")}
+        </SubmitButton>
         <p className="text-center text-[13px] text-muted-foreground">
-          {"Have an account? "}
+          {`${t("auth.haveAccount")} `}
           <Link
             className="text-foreground underline-offset-4 hover:underline"
             href={loginHref}
           >
-            Sign in
+            {t("auth.signIn")}
           </Link>
         </p>
       </AuthForm>

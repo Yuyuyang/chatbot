@@ -8,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useI18n } from "@/hooks/use-i18n";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import { cn } from "@/lib/utils";
 import {
@@ -19,26 +20,6 @@ import {
 
 export type VisibilityType = "private" | "public";
 
-const visibilities: Array<{
-  id: VisibilityType;
-  label: string;
-  description: string;
-  icon: ReactNode;
-}> = [
-  {
-    id: "private",
-    label: "Private",
-    description: "Only you can access this chat",
-    icon: <LockIcon />,
-  },
-  {
-    id: "public",
-    label: "Public",
-    description: "Anyone with the link can access this chat",
-    icon: <GlobeIcon />,
-  },
-];
-
 export function VisibilitySelector({
   chatId,
   className,
@@ -47,6 +28,7 @@ export function VisibilitySelector({
   chatId: string;
   selectedVisibilityType: VisibilityType;
 } & React.ComponentProps<typeof Button>) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
 
   const { visibilityType, setVisibilityType } = useChatVisibility({
@@ -54,9 +36,34 @@ export function VisibilitySelector({
     initialVisibilityType: selectedVisibilityType,
   });
 
+  const visibilities = useMemo<
+    Array<{
+      id: VisibilityType;
+      label: string;
+      description: string;
+      icon: ReactNode;
+    }>
+  >(
+    () => [
+      {
+        id: "private",
+        label: t("chat.visibility.private.label"),
+        description: t("chat.visibility.private.description"),
+        icon: <LockIcon />,
+      },
+      {
+        id: "public",
+        label: t("chat.visibility.public.label"),
+        description: t("chat.visibility.public.description"),
+        icon: <GlobeIcon />,
+      },
+    ],
+    [t]
+  );
+
   const selectedVisibility = useMemo(
     () => visibilities.find((visibility) => visibility.id === visibilityType),
-    [visibilityType]
+    [visibilityType, visibilities]
   );
 
   return (

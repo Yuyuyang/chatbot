@@ -8,6 +8,7 @@ import {
   ButtonGroup,
   ButtonGroupText,
 } from "@/components/ui/button-group";
+import { useI18n } from "@/hooks/use-i18n";
 import {
   Tooltip,
   TooltipContent,
@@ -257,11 +258,12 @@ export const MessageBranchPrevious = ({
   children,
   ...props
 }: MessageBranchPreviousProps) => {
+  const { t } = useI18n();
   const { goToPrevious, totalBranches } = useMessageBranch();
 
   return (
     <Button
-      aria-label="Previous branch"
+      aria-label={t("chat.messages.previousBranch")}
       disabled={totalBranches <= 1}
       onClick={goToPrevious}
       size="icon-sm"
@@ -280,11 +282,12 @@ export const MessageBranchNext = ({
   children,
   ...props
 }: MessageBranchNextProps) => {
+  const { t } = useI18n();
   const { goToNext, totalBranches } = useMessageBranch();
 
   return (
     <Button
-      aria-label="Next branch"
+      aria-label={t("chat.messages.nextBranch")}
       disabled={totalBranches <= 1}
       onClick={goToNext}
       size="icon-sm"
@@ -313,7 +316,7 @@ export const MessageBranchPage = ({
       )}
       {...props}
     >
-      {currentBranch + 1} of {totalBranches}
+      {currentBranch + 1} / {totalBranches}
     </ButtonGroupText>
   );
 };

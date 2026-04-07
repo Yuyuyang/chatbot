@@ -7,6 +7,7 @@ import type { Dispatch, SetStateAction } from "react";
 import { useState } from "react";
 import { useSWRConfig } from "swr";
 import { useArtifact } from "@/hooks/use-artifact";
+import { useI18n } from "@/hooks/use-i18n";
 import type { Document } from "@/lib/db/schema";
 import { cn, getDocumentTimestampByIndex } from "@/lib/utils";
 import { LoaderIcon } from "./icons";
@@ -27,6 +28,7 @@ export const VersionFooter = ({
   setMode,
 }: VersionFooterProps) => {
   const { artifact } = useArtifact();
+  const { t } = useI18n();
 
   const { mutate } = useSWRConfig();
   const [isMutating, setIsMutating] = useState(false);
@@ -57,7 +59,7 @@ export const VersionFooter = ({
             <ChevronLeftIcon className="size-4" />
           </button>
           <span className="min-w-[4rem] text-center text-xs tabular-nums text-muted-foreground">
-            {currentVersionIndex + 1} of {documents.length}
+            {currentVersionIndex + 1} / {documents.length}
           </span>
           <button
             className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
@@ -74,8 +76,9 @@ export const VersionFooter = ({
             "flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
             mode === "diff" && "bg-muted text-foreground"
           )}
+          aria-label={t("common.action.showChanges")}
           onClick={() => setMode(mode === "diff" ? "edit" : "diff")}
-          title="Show changes"
+          title={t("common.action.showChanges")}
           type="button"
         >
           <DiffIcon className="size-4" />
@@ -125,7 +128,7 @@ export const VersionFooter = ({
           }}
           type="button"
         >
-          Restore
+          {t("common.action.restore")}
           {isMutating && (
             <div className="animate-spin">
               <LoaderIcon size={14} />
@@ -140,7 +143,7 @@ export const VersionFooter = ({
           }}
           type="button"
         >
-          Latest
+          {t("common.action.latest")}
         </button>
       </div>
     </motion.div>

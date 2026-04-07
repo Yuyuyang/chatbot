@@ -20,13 +20,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useI18n } from "@/hooks/use-i18n";
 import type { ChatMessage } from "@/lib/types";
 import { type ArtifactKind, artifactDefinitions } from "./artifact";
-import type { ArtifactToolbarItem } from "./create-artifact";
+import type { ArtifactToolbarItem, LocalizedText } from "./create-artifact";
 import { ArrowUpIcon, StopIcon, SummarizeIcon } from "./icons";
 
 type ToolProps = {
-  description: string;
+  id: string;
+  description: LocalizedText;
   icon: ReactNode;
   selectedTool: string | null;
   setSelectedTool: Dispatch<SetStateAction<string | null>>;
@@ -36,12 +38,15 @@ type ToolProps = {
   sendMessage: UseChatHelpers<ChatMessage>["sendMessage"];
   onClick: ({
     sendMessage,
+    t,
   }: {
     sendMessage: UseChatHelpers<ChatMessage>["sendMessage"];
+    t: (key: string) => string;
   }) => void;
 };
 
 const Tool = ({
+  id,
   description,
   icon,
   selectedTool,
@@ -52,13 +57,16 @@ const Tool = ({
   sendMessage,
   onClick,
 }: ToolProps) => {
+  const { t } = useI18n();
   const [isHovered, setIsHovered] = useState(false);
+  const resolvedDescription =
+    typeof description === "function" ? description(t) : description;
 
   useEffect(() => {
-    if (selectedTool !== description) {
+    if (selectedTool !== id) {
       setIsHovered(false);
     }
-  }, [selectedTool, description]);
+  }, [id, selectedTool]);
 
   const handleSelect = () => {
     if (!isToolbarVisible && setIsToolbarVisible) {
@@ -68,15 +76,15 @@ const Tool = ({
 
     if (!selectedTool) {
       setIsHovered(true);
-      setSelectedTool(description);
+      setSelectedTool(id);
       return;
     }
 
-    if (selectedTool === description) {
+    if (selectedTool === id) {
       setSelectedTool(null);
-      onClick({ sendMessage });
+      onClick({ sendMessage, t });
     } else {
-      setSelectedTool(description);
+      setSelectedTool(id);
     }
   };
 
@@ -86,7 +94,7 @@ const Tool = ({
         <motion.div
           animate={{ opacity: 1, transition: { delay: 0.1 } }}
           className={cx("rounded-full p-3", {
-            "bg-primary text-primary-foreground!": selectedTool === description,
+            "bg-primary text-primary-foreground!": selectedTool === id,
           })}
           exit={{
             scale: 0.9,
@@ -98,7 +106,7 @@ const Tool = ({
             handleSelect();
           }}
           onHoverEnd={() => {
-            if (selectedTool !== description) {
+            if (selectedTool !== id) {
               setIsHovered(false);
             }
           }}
@@ -113,7 +121,7 @@ const Tool = ({
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >
-          {selectedTool === description ? <ArrowUpIcon /> : icon}
+          {selectedTool === id ? <ArrowUpIcon /> : icon}
         </motion.div>
       </TooltipTrigger>
       <TooltipContent
@@ -121,7 +129,7 @@ const Tool = ({
         side="left"
         sideOffset={16}
       >
-        {description}
+        {resolvedDescription}
       </TooltipContent>
     </Tooltip>
   );
@@ -138,13 +146,14 @@ const ReadingLevelSelector = ({
   isAnimating: boolean;
   sendMessage: UseChatHelpers<ChatMessage>["sendMessage"];
 }) => {
+  const { t } = useI18n();
   const LEVELS = [
-    "Elementary",
-    "Middle School",
-    "Keep current level",
-    "High School",
-    "College",
-    "Graduate",
+    t("chat.artifact.readingLevels.elementary"),
+    t("chat.artifact.readingLevels.middleSchool"),
+    t("chat.artifact.readingLevels.keepCurrentLevel"),
+    t("chat.artifact.readingLevels.highSchool"),
+    t("chat.artifact.readingLevels.college"),
+    t("chat.artifact.readingLevels.graduate"),
   ];
 
   const y = useMotionValue(-40 * 2);
@@ -201,7 +210,10 @@ const ReadingLevelSelector = ({
                     parts: [
                       {
                         type: "text",
-                        text: `Please adjust the reading level to ${LEVELS[currentLevel]} level.`,
+                        text: t("chat.artifact.adjustReadingLevelPrompt").replace(
+                          "{level}",
+                          LEVELS[currentLevel]
+                        ),
                       },
                     ],
                   });
@@ -264,8 +276,9 @@ export const Tools = ({
         <Tool
           description={tool.description}
           icon={tool.icon}
+          id={tool.id ?? String(tool.description)}
           isAnimating={isAnimating}
-          key={tool.description}
+          key={tool.id ?? String(tool.description)}
           onClick={tool.onClick}
           selectedTool={selectedTool}
           sendMessage={sendMessage}
@@ -280,8 +293,9 @@ const createFixErrorTool = (
   consoleOutput: string,
   documentId?: string
 ): ArtifactToolbarItem => ({
+  id: "fix-error",
   icon: <WrenchIcon className="size-4" />,
-  description: "Fix error",
+  description: (t) => t("chat.artifact.fixError"),
   onClick: ({ sendMessage: send }) => {
     send({
       role: "user",

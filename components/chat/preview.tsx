@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { suggestions } from "@/lib/constants";
+import { useI18n } from "@/hooks/use-i18n";
 import { SparklesIcon } from "./icons";
 
 export function Preview() {
+  const { dictionary, t } = useI18n();
   const router = useRouter();
 
   const handleAction = (query?: string) => {
@@ -18,21 +19,23 @@ export function Preview() {
         <div className="flex size-5 items-center justify-center rounded bg-muted/60 ring-1 ring-border/50">
           <SparklesIcon size={10} />
         </div>
-        <span className="text-[13px] text-muted-foreground">Chatbot</span>
+        <span className="text-[13px] text-muted-foreground">
+          {t("chat.title")}
+        </span>
       </div>
 
       <div className="flex flex-1 flex-col items-center justify-center gap-8 px-8">
         <div className="text-center">
           <h2 className="text-xl font-semibold tracking-tight">
-            What can I help with?
+            {t("chat.greeting.title")}
           </h2>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            Ask a question, write code, or explore ideas.
+            {t("chat.greeting.description")}
           </p>
         </div>
 
         <div className="grid w-full max-w-md grid-cols-2 gap-2">
-          {suggestions.map((suggestion) => (
+          {dictionary.chat.suggestions.map((suggestion) => (
             <button
               className="rounded-xl border border-border/30 bg-card/20 px-3 py-2.5 text-left text-[11px] leading-relaxed text-muted-foreground/70 transition-all duration-200 hover:border-border/60 hover:bg-card/40 hover:text-muted-foreground"
               key={suggestion}
@@ -51,7 +54,7 @@ export function Preview() {
           onClick={() => handleAction()}
           type="button"
         >
-          Ask anything...
+          {t("chat.composer.askAnything")}
         </button>
       </div>
     </div>

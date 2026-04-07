@@ -7,6 +7,7 @@ import {
   Collapsible,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { useI18n } from "@/hooks/use-i18n";
 import { cn } from "@/lib/utils";
 import { cjk } from "@streamdown/cjk";
 import { code } from "@streamdown/code";
@@ -155,13 +156,9 @@ export type ReasoningTriggerProps = ComponentProps<
 };
 
 const defaultGetThinkingMessage = (isStreaming: boolean, duration?: number) => {
-  if (isStreaming || duration === 0) {
-    return <Shimmer className="font-medium" duration={1}>Thinking...</Shimmer>;
-  }
-  if (duration === undefined) {
-    return <p>Thought for a few seconds</p>;
-  }
-  return <p>Thought for {duration} seconds</p>;
+  void isStreaming;
+  void duration;
+  return null;
 };
 
 export const ReasoningTrigger = memo(
@@ -171,7 +168,31 @@ export const ReasoningTrigger = memo(
     getThinkingMessage = defaultGetThinkingMessage,
     ...props
   }: ReasoningTriggerProps) => {
+    const { t } = useI18n();
     const { isStreaming, isOpen, duration } = useReasoning();
+    const resolvedGetThinkingMessage =
+      getThinkingMessage === defaultGetThinkingMessage
+        ? (streaming: boolean, thinkingDuration?: number) => {
+            if (streaming || thinkingDuration === 0) {
+              return (
+                <Shimmer className="font-medium" duration={1}>
+                  {t("chat.reasoning.thinking")}
+                </Shimmer>
+              );
+            }
+            if (thinkingDuration === undefined) {
+              return <p>{t("chat.reasoning.thoughtForAFewSeconds")}</p>;
+            }
+            return (
+              <p>
+                {t("chat.reasoning.thoughtForSeconds").replace(
+                  "{duration}",
+                  String(thinkingDuration)
+                )}
+              </p>
+            );
+          }
+        : getThinkingMessage;
 
     return (
       <CollapsibleTrigger
@@ -183,7 +204,7 @@ export const ReasoningTrigger = memo(
       >
         {children ?? (
           <>
-            {getThinkingMessage(isStreaming, duration)}
+            {resolvedGetThinkingMessage(isStreaming, duration)}
             <ChevronDownIcon
               className={cn(
                 "size-4 transition-transform",

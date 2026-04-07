@@ -34,6 +34,7 @@ import {
   type ChatModel,
   type ModelCapabilities,
 } from "@/lib/ai/models";
+import { useI18n } from "@/hooks/use-i18n";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import {
@@ -100,6 +101,7 @@ function PureMultimodalInput({
   isLoading?: boolean;
 }) {
   const router = useRouter();
+  const { t } = useI18n();
   const { setTheme, resolvedTheme } = useTheme();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
@@ -155,7 +157,7 @@ function PureMultimodalInput({
         setMessages(() => []);
         break;
       case "rename":
-        toast("Rename is available from the sidebar chat menu.");
+        toast(t("chat.composer.renameAvailable"));
         break;
       case "model": {
         const modelBtn = document.querySelector<HTMLButtonElement>(
@@ -168,30 +170,30 @@ function PureMultimodalInput({
         setTheme(resolvedTheme === "dark" ? "light" : "dark");
         break;
       case "delete":
-        toast("Delete this chat?", {
+        toast(t("chat.composer.deleteThisChat"), {
           action: {
-            label: "Delete",
+            label: t("chat.composer.deleteThisChatConfirm"),
             onClick: () => {
               fetch(
                 `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/chat?id=${chatId}`,
                 { method: "DELETE" }
               );
               router.push("/");
-              toast.success("Chat deleted");
+              toast.success(t("chat.history.deletedToast"));
             },
           },
         });
         break;
       case "purge":
-        toast("Delete all chats?", {
+        toast(t("chat.navigation.deleteAllDialogTitle"), {
           action: {
-            label: "Delete all",
+            label: t("chat.navigation.deleteAllConfirm"),
             onClick: () => {
               fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/history`, {
                 method: "DELETE",
               });
               router.push("/");
-              toast.success("All chats deleted");
+              toast.success(t("chat.navigation.allChatsDeleted"));
             },
           },
         });
@@ -272,11 +274,13 @@ function PureMultimodalInput({
         };
       }
       const payload = await response.json();
-      toast.error(payload.error ?? payload.message ?? "Failed to upload file");
+      toast.error(
+        payload.error ?? payload.message ?? t("chat.composer.failedUploadFile")
+      );
     } catch (_error) {
-      toast.error("Failed to upload file, please try again!");
+      toast.error(t("chat.composer.failedUploadFileRetry"));
     }
-  }, []);
+  }, [t]);
 
   const handleFileChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -296,12 +300,12 @@ function PureMultimodalInput({
           ...successfullyUploadedAttachments,
         ]);
       } catch (_error) {
-        toast.error("Failed to upload files");
+        toast.error(t("chat.composer.failedUploadFiles"));
       } finally {
         setUploadQueue([]);
       }
     },
-    [setAttachments, uploadFile]
+    [setAttachments, t, uploadFile]
   );
 
   const handlePaste = useCallback(
@@ -321,7 +325,7 @@ function PureMultimodalInput({
 
       event.preventDefault();
 
-      setUploadQueue((prev) => [...prev, "Pasted image"]);
+      setUploadQueue((prev) => [...prev, t("chat.composer.pastedImage")]);
 
       try {
         const uploadPromises = imageItems
@@ -342,12 +346,12 @@ function PureMultimodalInput({
           ...(successfullyUploadedAttachments as Attachment[]),
         ]);
       } catch (_error) {
-        toast.error("Failed to upload pasted image(s)");
+        toast.error(t("chat.composer.failedUploadPastedImages"));
       } finally {
         setUploadQueue([]);
       }
     },
-    [setAttachments, uploadFile]
+    [setAttachments, t, uploadFile]
   );
 
   useEffect(() => {
@@ -364,7 +368,7 @@ function PureMultimodalInput({
     <div className={cn("relative flex w-full flex-col gap-4", className)}>
       {editingMessage && onCancelEdit && (
         <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
-          <span>Editing message</span>
+          <span>{t("chat.composer.editingMessage")}</span>
           <button
             className="rounded px-1.5 py-0.5 text-muted-foreground/50 transition-colors hover:bg-muted hover:text-foreground"
             onMouseDown={(e) => {
@@ -373,7 +377,7 @@ function PureMultimodalInput({
             }}
             type="button"
           >
-            Cancel
+            {t("common.action.cancel")}
           </button>
         </div>
       )}
@@ -427,7 +431,7 @@ function PureMultimodalInput({
           if (status === "ready" || status === "error") {
             submitForm();
           } else {
-            toast.error("Please wait for the model to finish its response!");
+            toast.error(t("chat.composer.waitForModel"));
           }
         }}
       >
@@ -502,7 +506,9 @@ function PureMultimodalInput({
             }
           }}
           placeholder={
-            editingMessage ? "Edit your message..." : "Ask anything..."
+            editingMessage
+              ? t("chat.composer.editYourMessage")
+              : t("chat.composer.askAnything")
           }
           ref={textareaRef}
           value={input}
@@ -625,6 +631,7 @@ function PureModelSelectorCompact({
   selectedModelId: string;
   onModelChange?: (modelId: string) => void;
 }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const { data: modelsData } = useSWR(
     `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/models`,
@@ -663,12 +670,12 @@ function PureModelSelectorCompact({
         >
           {provider ? <ModelSelectorLogo provider={provider} /> : null}
           <ModelSelectorName>
-            {selectedModel?.name ?? "Loading models..."}
+            {selectedModel?.name ?? t("chat.composer.loadingModels")}
           </ModelSelectorName>
         </Button>
       </ModelSelectorTrigger>
       <ModelSelectorContent>
-        <ModelSelectorInput placeholder="Search models..." />
+        <ModelSelectorInput placeholder={t("chat.composer.searchModels")} />
         <ModelSelectorList>
           {(() => {
             const grouped: Record<string, ChatModel[]> = {};

@@ -113,9 +113,10 @@ export const codeArtifact = new Artifact<"code", Metadata>({
   },
   actions: [
     {
+      id: "execute-code",
       icon: <PlayIcon size={18} />,
       label: "Run",
-      description: "Execute code",
+      description: (t) => t("chat.artifact.executeCode"),
       onClick: async ({ content, setMetadata }) => {
         const runId = generateUUID();
         const outputContent: ConsoleOutputContent[] = [];
@@ -215,8 +216,9 @@ export const codeArtifact = new Artifact<"code", Metadata>({
       },
     },
     {
+      id: "view-previous-version",
       icon: <UndoIcon size={18} />,
-      description: "View Previous version",
+      description: (t) => t("chat.artifact.viewPreviousVersion"),
       onClick: ({ handleVersionChange }) => {
         handleVersionChange("prev");
       },
@@ -229,8 +231,9 @@ export const codeArtifact = new Artifact<"code", Metadata>({
       },
     },
     {
+      id: "view-next-version",
       icon: <RedoIcon size={18} />,
-      description: "View Next version",
+      description: (t) => t("chat.artifact.viewNextVersion"),
       onClick: ({ handleVersionChange }) => {
         handleVersionChange("next");
       },
@@ -243,18 +246,20 @@ export const codeArtifact = new Artifact<"code", Metadata>({
       },
     },
     {
+      id: "copy-code-to-clipboard",
       icon: <CopyIcon size={18} />,
-      description: "Copy code to clipboard",
-      onClick: ({ content }) => {
+      description: (t) => t("chat.artifact.copyCodeToClipboard"),
+      onClick: ({ content, t }) => {
         navigator.clipboard.writeText(content);
-        toast.success("Copied to clipboard!");
+        toast.success(t("chat.artifact.copiedToClipboard"));
       },
     },
   ],
   toolbar: [
     {
+      id: "add-comments",
       icon: <MessageIcon />,
-      description: "Add comments",
+      description: (t) => t("chat.artifact.addComments"),
       onClick: ({ sendMessage }) => {
         sendMessage({
           role: "user",
@@ -268,8 +273,9 @@ export const codeArtifact = new Artifact<"code", Metadata>({
       },
     },
     {
+      id: "add-logs",
       icon: <LogsIcon />,
-      description: "Add logs",
+      description: (t) => t("chat.artifact.addLogs"),
       onClick: ({ sendMessage }) => {
         sendMessage({
           role: "user",

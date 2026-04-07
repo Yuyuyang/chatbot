@@ -19,8 +19,9 @@ export const imageArtifact = new Artifact({
   content: ImageEditor,
   actions: [
     {
+      id: "view-previous-version",
       icon: <UndoIcon size={18} />,
-      description: "View Previous version",
+      description: (t) => t("chat.artifact.viewPreviousVersion"),
       onClick: ({ handleVersionChange }) => {
         handleVersionChange("prev");
       },
@@ -33,8 +34,9 @@ export const imageArtifact = new Artifact({
       },
     },
     {
+      id: "view-next-version",
       icon: <RedoIcon size={18} />,
-      description: "View Next version",
+      description: (t) => t("chat.artifact.viewNextVersion"),
       onClick: ({ handleVersionChange }) => {
         handleVersionChange("next");
       },
@@ -47,9 +49,10 @@ export const imageArtifact = new Artifact({
       },
     },
     {
+      id: "copy-image-to-clipboard",
       icon: <CopyIcon size={18} />,
-      description: "Copy image to clipboard",
-      onClick: ({ content }) => {
+      description: (t) => t("chat.artifact.copyImageToClipboard"),
+      onClick: ({ content, t }) => {
         const img = new Image();
         img.src = `data:image/png;base64,${content}`;
 
@@ -68,7 +71,7 @@ export const imageArtifact = new Artifact({
           }, "image/png");
         };
 
-        toast.success("Copied image to clipboard!");
+        toast.success(t("chat.artifact.copiedImageToClipboard"));
       },
     },
   ],

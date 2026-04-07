@@ -5,6 +5,9 @@ import type { Suggestion } from "@/lib/db/schema";
 import type { ChatMessage, CustomUIDataTypes } from "@/lib/types";
 import type { UIArtifact } from "./artifact";
 
+export type TranslateFn = (key: string) => string;
+export type LocalizedText = string | ((t: TranslateFn) => string);
+
 export type ArtifactActionContext<M = any> = {
   content: string;
   handleVersionChange: (type: "next" | "prev" | "toggle" | "latest") => void;
@@ -13,22 +16,26 @@ export type ArtifactActionContext<M = any> = {
   mode: "edit" | "diff";
   metadata: M;
   setMetadata: Dispatch<SetStateAction<M>>;
+  t: TranslateFn;
 };
 
 type ArtifactAction<M = any> = {
+  id?: string;
   icon: ReactNode;
-  label?: string;
-  description: string;
+  label?: LocalizedText;
+  description: LocalizedText;
   onClick: (context: ArtifactActionContext<M>) => Promise<void> | void;
   isDisabled?: (context: ArtifactActionContext<M>) => boolean;
 };
 
 export type ArtifactToolbarContext = {
   sendMessage: UseChatHelpers<ChatMessage>["sendMessage"];
+  t: TranslateFn;
 };
 
 export type ArtifactToolbarItem = {
-  description: string;
+  id?: string;
+  description: LocalizedText;
   icon: ReactNode;
   onClick: (context: ArtifactToolbarContext) => void;
 };

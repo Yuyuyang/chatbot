@@ -12,6 +12,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useActiveChat } from "@/hooks/use-active-chat";
+import { useI18n } from "@/hooks/use-i18n";
 import {
   initialArtifactData,
   useArtifact,
@@ -27,6 +28,7 @@ import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
 
 export function ChatShell() {
+  const { t } = useI18n();
   const {
     chatId,
     messages,
@@ -177,15 +179,15 @@ export function ChatShell() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Activate AI Gateway</AlertDialogTitle>
+            <AlertDialogTitle>{t("chat.gateway.activateTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This application requires{" "}
-              {process.env.NODE_ENV === "production" ? "the owner" : "you"} to
-              activate Vercel AI Gateway.
+              {process.env.NODE_ENV === "production"
+                ? t("chat.gateway.activateDescriptionOwner")
+                : t("chat.gateway.activateDescriptionSelf")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.action.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 window.open(
@@ -195,7 +197,7 @@ export function ChatShell() {
                 window.location.href = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/`;
               }}
             >
-              Activate
+              {t("common.action.activate")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

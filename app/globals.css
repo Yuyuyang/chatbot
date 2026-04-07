@@ -146,10 +146,22 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family:
+      var(--font-geist), "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+      "Noto Sans CJK SC", sans-serif;
     font-feature-settings: "ss01", "ss02", "cv01";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+  }
+
+  code,
+  kbd,
+  pre,
+  samp {
+    font-family:
+      var(--font-geist-mono), "SFMono-Regular", "SF Mono", Consolas,
+      "Liberation Mono", Menlo, monospace;
   }
 }
 

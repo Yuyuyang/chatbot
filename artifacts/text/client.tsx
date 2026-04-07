@@ -101,8 +101,9 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
   },
   actions: [
     {
+      id: "view-changes",
       icon: <ClockRewind size={18} />,
-      description: "View changes",
+      description: (t) => t("chat.artifact.viewChanges"),
       onClick: ({ handleVersionChange }) => {
         handleVersionChange("toggle");
       },
@@ -115,8 +116,9 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
       },
     },
     {
+      id: "view-previous-version",
       icon: <UndoIcon size={18} />,
-      description: "View Previous version",
+      description: (t) => t("chat.artifact.viewPreviousVersion"),
       onClick: ({ handleVersionChange }) => {
         handleVersionChange("prev");
       },
@@ -129,8 +131,9 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
       },
     },
     {
+      id: "view-next-version",
       icon: <RedoIcon size={18} />,
-      description: "View Next version",
+      description: (t) => t("chat.artifact.viewNextVersion"),
       onClick: ({ handleVersionChange }) => {
         handleVersionChange("next");
       },
@@ -143,18 +146,20 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
       },
     },
     {
+      id: "copy-to-clipboard",
       icon: <CopyIcon size={18} />,
-      description: "Copy to clipboard",
-      onClick: ({ content }) => {
+      description: (t) => t("chat.artifact.copyToClipboard"),
+      onClick: ({ content, t }) => {
         navigator.clipboard.writeText(content);
-        toast.success("Copied to clipboard!");
+        toast.success(t("chat.artifact.copiedToClipboard"));
       },
     },
   ],
   toolbar: [
     {
+      id: "add-final-polish",
       icon: <PenIcon />,
-      description: "Add final polish",
+      description: (t) => t("chat.artifact.addFinalPolish"),
       onClick: ({ sendMessage }) => {
         sendMessage({
           role: "user",
@@ -168,8 +173,9 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
       },
     },
     {
+      id: "request-suggestions",
       icon: <MessageIcon />,
-      description: "Request suggestions",
+      description: (t) => t("chat.artifact.requestSuggestions"),
       onClick: ({ sendMessage }) => {
         sendMessage({
           role: "user",

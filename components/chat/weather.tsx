@@ -3,6 +3,7 @@
 import cx from "classnames";
 import { format, isWithinInterval } from "date-fns";
 import { useEffect, useState } from "react";
+import { useI18n } from "@/hooks/use-i18n";
 
 const SunIcon = ({ size = 40 }: { size?: number }) => (
   <svg fill="none" height={size} viewBox="0 0 24 24" width={size}>
@@ -283,6 +284,7 @@ export function Weather({
 }: {
   weatherAtLocation?: WeatherAtLocation;
 }) {
+  const { t } = useI18n();
   const currentHigh = Math.max(
     ...weatherAtLocation.hourly.temperature_2m.slice(0, 24)
   );
@@ -370,15 +372,17 @@ export function Weather({
 
           <div className="text-right">
             <div className="font-medium text-white/90 text-xs">
-              H: {n(currentHigh)}°
+              {t("chat.weather.high")}: {n(currentHigh)}°
             </div>
-            <div className="text-white/70 text-xs">L: {n(currentLow)}°</div>
+            <div className="text-white/70 text-xs">
+              {t("chat.weather.low")}: {n(currentLow)}°
+            </div>
           </div>
         </div>
 
         <div className="rounded-xl bg-white/10 p-3 backdrop-blur-sm">
           <div className="mb-2 font-medium text-white/80 text-xs">
-            Hourly Forecast
+            {t("chat.weather.hourlyForecast")}
           </div>
           <div className="flex justify-between gap-1">
             {displayTimes.map((time, index) => {
@@ -397,7 +401,7 @@ export function Weather({
                   key={time}
                 >
                   <div className="font-medium text-white/70 text-xs">
-                    {index === 0 ? "Now" : format(hourTime, "ha")}
+                    {index === 0 ? t("chat.weather.now") : format(hourTime, "ha")}
                   </div>
 
                   <div
@@ -420,11 +424,11 @@ export function Weather({
 
         <div className="mt-2 flex justify-between text-white/60 text-xs">
           <div>
-            Sunrise:{" "}
+            {t("chat.weather.sunrise")}:{" "}
             {format(new Date(weatherAtLocation.daily.sunrise[0]), "h:mm a")}
           </div>
           <div>
-            Sunset:{" "}
+            {t("chat.weather.sunset")}:{" "}
             {format(new Date(weatherAtLocation.daily.sunset[0]), "h:mm a")}
           </div>
         </div>

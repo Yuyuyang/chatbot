@@ -9,6 +9,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { useI18n } from "@/hooks/use-i18n";
 import { cn } from "@/lib/utils";
 import {
   CheckCircleIcon,
@@ -45,16 +46,6 @@ export type ToolHeaderProps = {
     }
 );
 
-const statusLabels: Record<ToolPart["state"], string> = {
-  "approval-requested": "Awaiting Approval",
-  "approval-responded": "Responded",
-  "input-available": "Running",
-  "input-streaming": "Pending",
-  "output-available": "Completed",
-  "output-denied": "Denied",
-  "output-error": "Error",
-};
-
 const statusIcons: Record<ToolPart["state"], ReactNode> = {
   "approval-requested": <ClockIcon className="size-4 text-yellow-600" />,
   "approval-responded": <CheckCircleIcon className="size-4 text-blue-600" />,
@@ -65,12 +56,29 @@ const statusIcons: Record<ToolPart["state"], ReactNode> = {
   "output-error": <XCircleIcon className="size-4 text-red-600" />,
 };
 
-export const getStatusBadge = (status: ToolPart["state"]) => (
-  <Badge className="gap-1.5 rounded-full text-xs" variant="secondary">
-    {statusIcons[status]}
-    {statusLabels[status]}
-  </Badge>
-);
+const getStatusLabel = (
+  status: ToolPart["state"],
+  t: (key: string) => string
+) => {
+  switch (status) {
+    case "approval-requested":
+      return t("chat.tools.awaitingApproval");
+    case "approval-responded":
+      return t("chat.tools.responded");
+    case "input-available":
+      return t("chat.tools.running");
+    case "input-streaming":
+      return t("chat.tools.pending");
+    case "output-available":
+      return t("chat.tools.completed");
+    case "output-denied":
+      return t("chat.tools.denied");
+    case "output-error":
+      return t("chat.tools.error");
+    default:
+      return status;
+  }
+};
 
 export const ToolHeader = ({
   className,
@@ -80,6 +88,7 @@ export const ToolHeader = ({
   toolName,
   ...props
 }: ToolHeaderProps) => {
+  const { t } = useI18n();
   const derivedName =
     type === "dynamic-tool" ? toolName : type.split("-").slice(1).join("-");
 
@@ -94,7 +103,10 @@ export const ToolHeader = ({
       <div className="flex items-center gap-2">
         <WrenchIcon className="size-4 text-muted-foreground" />
         <span className="font-medium text-sm">{title ?? derivedName}</span>
-        {getStatusBadge(state)}
+        <Badge className="gap-1.5 rounded-full text-xs" variant="secondary">
+          {statusIcons[state]}
+          {getStatusLabel(state, t)}
+        </Badge>
       </div>
       <ChevronDownIcon className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
     </CollapsibleTrigger>
@@ -117,16 +129,20 @@ export type ToolInputProps = ComponentProps<"div"> & {
   input: ToolPart["input"];
 };
 
-export const ToolInput = ({ className, input, ...props }: ToolInputProps) => (
-  <div className={cn("space-y-2 overflow-hidden", className)} {...props}>
-    <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-      Parameters
-    </h4>
-    <div className="rounded-md bg-muted/50">
-      <CodeBlock code={JSON.stringify(input, null, 2)} language="json" />
+export const ToolInput = ({ className, input, ...props }: ToolInputProps) => {
+  const { t } = useI18n();
+
+  return (
+    <div className={cn("space-y-2 overflow-hidden", className)} {...props}>
+      <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+        {t("chat.tools.parameters")}
+      </h4>
+      <div className="rounded-md bg-muted/50">
+        <CodeBlock code={JSON.stringify(input, null, 2)} language="json" />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export type ToolOutputProps = ComponentProps<"div"> & {
   output: ToolPart["output"];
@@ -139,6 +155,8 @@ export const ToolOutput = ({
   errorText,
   ...props
 }: ToolOutputProps) => {
+  const { t } = useI18n();
+
   if (!(output || errorText)) {
     return null;
   }
@@ -156,7 +174,7 @@ export const ToolOutput = ({
   return (
     <div className={cn("space-y-2", className)} {...props}>
       <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-        {errorText ? "Error" : "Result"}
+        {errorText ? t("chat.tools.error") : t("chat.tools.result")}
       </h4>
       <div
         className={cn(

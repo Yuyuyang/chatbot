@@ -39,8 +39,9 @@ export const sheetArtifact = new Artifact<"sheet", Metadata>({
   },
   actions: [
     {
+      id: "view-previous-version",
       icon: <UndoIcon size={18} />,
-      description: "View Previous version",
+      description: (t) => t("chat.artifact.viewPreviousVersion"),
       onClick: ({ handleVersionChange }) => {
         handleVersionChange("prev");
       },
@@ -53,8 +54,9 @@ export const sheetArtifact = new Artifact<"sheet", Metadata>({
       },
     },
     {
+      id: "view-next-version",
       icon: <RedoIcon size={18} />,
-      description: "View Next version",
+      description: (t) => t("chat.artifact.viewNextVersion"),
       onClick: ({ handleVersionChange }) => {
         handleVersionChange("next");
       },
@@ -67,9 +69,10 @@ export const sheetArtifact = new Artifact<"sheet", Metadata>({
       },
     },
     {
+      id: "copy-as-csv",
       icon: <CopyIcon />,
-      description: "Copy as .csv",
-      onClick: ({ content }) => {
+      description: (t) => t("chat.artifact.copyAsCsv"),
+      onClick: ({ content, t }) => {
         const parsed = parse<string[]>(content, { skipEmptyLines: true });
 
         const nonEmptyRows = parsed.data.filter((row) =>
@@ -79,13 +82,14 @@ export const sheetArtifact = new Artifact<"sheet", Metadata>({
         const cleanedCsv = unparse(nonEmptyRows);
 
         navigator.clipboard.writeText(cleanedCsv);
-        toast.success("Copied csv to clipboard!");
+        toast.success(t("chat.artifact.copiedCsvToClipboard"));
       },
     },
   ],
   toolbar: [
     {
-      description: "Format and clean data",
+      id: "format-and-clean-data",
+      description: (t) => t("chat.artifact.formatAndCleanData"),
       icon: <SparklesIcon />,
       onClick: ({ sendMessage }) => {
         sendMessage({
@@ -97,7 +101,8 @@ export const sheetArtifact = new Artifact<"sheet", Metadata>({
       },
     },
     {
-      description: "Analyze and visualize data",
+      id: "analyze-and-visualize-data",
+      description: (t) => t("chat.artifact.analyzeAndVisualizeData"),
       icon: <LineChartIcon />,
       onClick: ({ sendMessage }) => {
         sendMessage({

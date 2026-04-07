@@ -3,6 +3,7 @@
 import type { ComponentProps } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/hooks/use-i18n";
 import { cn } from "@/lib/utils";
 import { ArrowDownIcon, DownloadIcon } from "lucide-react";
 import { useCallback } from "react";
@@ -42,32 +43,40 @@ export type ConversationEmptyStateProps = ComponentProps<"div"> & {
 
 export const ConversationEmptyState = ({
   className,
-  title = "No messages yet",
-  description = "Start a conversation to see messages here",
+  title,
+  description,
   icon,
   children,
   ...props
-}: ConversationEmptyStateProps) => (
-  <div
-    className={cn(
-      "flex size-full flex-col items-center justify-center gap-3 p-8 text-center",
-      className
-    )}
-    {...props}
-  >
-    {children ?? (
-      <>
-        {icon && <div className="text-muted-foreground">{icon}</div>}
-        <div className="space-y-1">
-          <h3 className="font-medium text-sm">{title}</h3>
-          {description && (
-            <p className="text-muted-foreground text-sm">{description}</p>
-          )}
-        </div>
-      </>
-    )}
-  </div>
-);
+}: ConversationEmptyStateProps) => {
+  const { t } = useI18n();
+
+  return (
+    <div
+      className={cn(
+        "flex size-full flex-col items-center justify-center gap-3 p-8 text-center",
+        className
+      )}
+      {...props}
+    >
+      {children ?? (
+        <>
+          {icon && <div className="text-muted-foreground">{icon}</div>}
+          <div className="space-y-1">
+            <h3 className="font-medium text-sm">
+              {title ?? t("chat.conversation.emptyTitle")}
+            </h3>
+            {(description ?? t("chat.conversation.emptyDescription")) && (
+              <p className="text-muted-foreground text-sm">
+                {description ?? t("chat.conversation.emptyDescription")}
+              </p>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
 
 export type ConversationScrollButtonProps = ComponentProps<typeof Button>;
 
@@ -130,24 +139,26 @@ export const messagesToMarkdown = (
 
 export const ConversationDownload = ({
   messages,
-  filename = "conversation.md",
+  filename,
   formatMessage = defaultFormatMessage,
   className,
   children,
   ...props
 }: ConversationDownloadProps) => {
+  const { t } = useI18n();
+
   const handleDownload = useCallback(() => {
     const markdown = messagesToMarkdown(messages, formatMessage);
     const blob = new Blob([markdown], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = filename;
+    link.download = filename ?? t("chat.conversation.downloadFilename");
     document.body.append(link);
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
-  }, [messages, filename, formatMessage]);
+  }, [messages, filename, formatMessage, t]);
 
   return (
     <Button

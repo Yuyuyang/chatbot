@@ -4,6 +4,7 @@ import { ChevronUp } from "lucide-react";
 import type { User } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
+import { useI18n } from "@/hooks/use-i18n";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +29,7 @@ function emailToHue(email: string): number {
 }
 
 export function SidebarUserNav({ user }: { user: User }) {
+  const { t } = useI18n();
   const { status } = useSession();
   const { setTheme, resolvedTheme } = useTheme();
 
@@ -41,7 +43,7 @@ export function SidebarUserNav({ user }: { user: User }) {
                 <div className="flex flex-row items-center gap-2">
                   <div className="size-6 animate-pulse rounded-full bg-sidebar-foreground/10" />
                   <span className="animate-pulse rounded-md bg-sidebar-foreground/10 text-transparent text-[13px]">
-                    Loading...
+                    {t("chat.userNav.loading")}
                   </span>
                 </div>
                 <div className="animate-spin text-sidebar-foreground/50">
@@ -78,7 +80,9 @@ export function SidebarUserNav({ user }: { user: User }) {
                 setTheme(resolvedTheme === "dark" ? "light" : "dark")
               }
             >
-              {`Toggle ${resolvedTheme === "light" ? "dark" : "light"} mode`}
+              {resolvedTheme === "light"
+                ? t("common.theme.toggleToDark")
+                : t("common.theme.toggleToLight")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild data-testid="user-nav-item-auth">
@@ -88,8 +92,7 @@ export function SidebarUserNav({ user }: { user: User }) {
                   if (status === "loading") {
                     toast({
                       type: "error",
-                      description:
-                        "Checking authentication status, please try again!",
+                      description: t("chat.userNav.checkingAuthStatus"),
                     });
 
                     return;
@@ -101,7 +104,7 @@ export function SidebarUserNav({ user }: { user: User }) {
                 }}
                 type="button"
               >
-                Sign out
+                {t("chat.navigation.signOut")}
               </button>
             </DropdownMenuItem>
           </DropdownMenuContent>

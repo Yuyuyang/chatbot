@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { I18nProvider } from "@/components/providers/i18n-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { getRequestLocale } from "@/lib/i18n/get-request-locale";
 
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
@@ -48,15 +51,18 @@ const THEME_COLOR_SCRIPT = `\
   updateThemeColor();
 })();`;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getRequestLocale();
+  const dictionary = await getDictionary(locale);
+
   return (
     <html
       className={`${geist.variable} ${geistMono.variable}`}
-      lang="en"
+      lang={locale}
       suppressHydrationWarning
     >
       <head>
@@ -68,18 +74,20 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          disableTransitionOnChange
-          enableSystem
-        >
-          <SessionProvider
-            basePath={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/auth`}
+        <I18nProvider dictionary={dictionary} locale={locale}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            disableTransitionOnChange
+            enableSystem
           >
-            <TooltipProvider>{children}</TooltipProvider>
-          </SessionProvider>
-        </ThemeProvider>
+            <SessionProvider
+              basePath={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/auth`}
+            >
+              <TooltipProvider>{children}</TooltipProvider>
+            </SessionProvider>
+          </ThemeProvider>
+        </I18nProvider>
       </body>
     </html>
   );
