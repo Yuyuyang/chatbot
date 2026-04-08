@@ -77,12 +77,12 @@ async function generateTitleFromText({
   return sanitizeGeneratedTitle(text);
 }
 
-export function generateTitleFromUserMessage({
+export async function generateTitleFromUserMessage({
   message,
 }: {
   message: UIMessage;
 }) {
-  return generateTitleFromText({
+  return await generateTitleFromText({
     input: getTextFromMessage(message),
     systemPrompt: titlePrompt,
   });
