@@ -1,9 +1,10 @@
 "use client";
 
+import { BrainIcon } from "lucide-react";
 import Link from "next/link";
 import { memo } from "react";
-import { useI18n } from "@/hooks/use-i18n";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
+import { useI18n } from "@/hooks/use-i18n";
 import type { Chat } from "@/lib/db/schema";
 import {
   DropdownMenu,
@@ -23,6 +24,7 @@ import {
 import {
   CheckCircleFillIcon,
   GlobeIcon,
+  LoaderIcon,
   LockIcon,
   MoreHorizontalIcon,
   ShareIcon,
@@ -33,11 +35,15 @@ const PureChatItem = ({
   chat,
   isActive,
   onDelete,
+  onSummarize,
+  isSummarizing,
   setOpenMobile,
 }: {
   chat: Chat;
   isActive: boolean;
   onDelete: (chatId: string) => void;
+  onSummarize: (chatId: string) => void;
+  isSummarizing: boolean;
   setOpenMobile: (open: boolean) => void;
 }) => {
   const { t } = useI18n();
@@ -108,6 +114,24 @@ const PureChatItem = ({
           </DropdownMenuSub>
 
           <DropdownMenuItem
+            disabled={isSummarizing}
+            onSelect={() => onSummarize(chat.id)}
+          >
+            {isSummarizing ? (
+              <div className="animate-spin">
+                <LoaderIcon />
+              </div>
+            ) : (
+              <BrainIcon />
+            )}
+            <span>
+              {isSummarizing
+                ? t("chat.navigation.summarizing")
+                : t("chat.navigation.summarize")}
+            </span>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
             onSelect={() => onDelete(chat.id)}
             variant="destructive"
           >
@@ -121,8 +145,11 @@ const PureChatItem = ({
 };
 
 export const ChatItem = memo(PureChatItem, (prevProps, nextProps) => {
-  if (prevProps.isActive !== nextProps.isActive) {
-    return false;
-  }
-  return true;
+  return (
+    prevProps.isActive === nextProps.isActive &&
+    prevProps.isSummarizing === nextProps.isSummarizing &&
+    prevProps.chat.id === nextProps.chat.id &&
+    prevProps.chat.title === nextProps.chat.title &&
+    prevProps.chat.visibility === nextProps.chat.visibility
+  );
 });

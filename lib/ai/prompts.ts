@@ -129,3 +129,17 @@ Examples:
 - "debug my python code" → Python Debugging
 
 Never output hashtags, prefixes like "Title:", or quotes.`;
+
+export const conversationTitlePrompt = `Generate a concise chat title (2-6 words) based on the overall conversation.
+
+Focus on the conversation's final or most meaningful topic, not greetings or filler.
+Prefer the main language already used in the conversation.
+
+Output ONLY the title text. No prefixes, no quotes, no markdown, no punctuation decoration.
+
+Examples:
+- user asks about React state, then debugging hooks → React Hooks Debugging
+- user brainstorms startup pricing in Chinese → SaaS 定价策略
+- user starts with "hi" but later asks about Postgres indexes → Postgres Indexing Help
+
+Never output hashtags, prefixes like "Title:", quotes, bullet points, or multiple lines.`;

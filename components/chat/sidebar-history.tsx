@@ -7,7 +7,7 @@ import type { User } from "next-auth";
 import { useState } from "react";
 import { toast } from "sonner";
 import useSWRInfinite from "swr/infinite";
-import { useI18n } from "@/hooks/use-i18n";
+import { regenerateChatTitle } from "@/app/(chat)/actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +25,7 @@ import {
   SidebarMenu,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useI18n } from "@/hooks/use-i18n";
 import type { Chat } from "@/lib/db/schema";
 import { fetcher } from "@/lib/utils";
 import { LoaderIcon } from "./icons";
@@ -120,6 +121,9 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
   const router = useRouter();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [summarizingChatId, setSummarizingChatId] = useState<string | null>(
+    null
+  );
 
   const hasReachedEnd = paginatedChatHistories
     ? paginatedChatHistories.some((page) => page.hasMore === false)
@@ -154,6 +158,51 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
     );
 
     toast.success(t("chat.history.deletedToast"));
+  };
+
+  const handleSummarize = async (chatId: string) => {
+    if (summarizingChatId) {
+      return;
+    }
+
+    setSummarizingChatId(chatId);
+
+    try {
+      const result = await regenerateChatTitle({ chatId });
+
+      if (!result.success) {
+        switch (result.reason) {
+          case "no_content":
+          case "invalid_title":
+            toast.error(t("chat.history.summarizeUnavailableToast"));
+            break;
+          default:
+            toast.error(t("chat.history.summarizeFailedToast"));
+            break;
+        }
+        return;
+      }
+
+      await mutate(
+        (pages) =>
+          pages?.map((page) => ({
+            ...page,
+            chats: page.chats.map((chat) =>
+              chat.id === result.chatId
+                ? { ...chat, title: result.title }
+                : chat
+            ),
+          })),
+        { revalidate: false }
+      );
+
+      toast.success(t("chat.history.summarizedToast"));
+      mutate();
+    } catch (_error) {
+      toast.error(t("chat.history.summarizeFailedToast"));
+    } finally {
+      setSummarizingChatId(null);
+    }
   };
 
   if (!user) {
@@ -239,11 +288,13 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
                           <ChatItem
                             chat={chat}
                             isActive={chat.id === id}
+                            isSummarizing={summarizingChatId === chat.id}
                             key={chat.id}
                             onDelete={(chatId) => {
                               setDeleteId(chatId);
                               setShowDeleteDialog(true);
                             }}
+                            onSummarize={handleSummarize}
                             setOpenMobile={setOpenMobile}
                           />
                         ))}
@@ -259,11 +310,13 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
                           <ChatItem
                             chat={chat}
                             isActive={chat.id === id}
+                            isSummarizing={summarizingChatId === chat.id}
                             key={chat.id}
                             onDelete={(chatId) => {
                               setDeleteId(chatId);
                               setShowDeleteDialog(true);
                             }}
+                            onSummarize={handleSummarize}
                             setOpenMobile={setOpenMobile}
                           />
                         ))}
@@ -279,11 +332,13 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
                           <ChatItem
                             chat={chat}
                             isActive={chat.id === id}
+                            isSummarizing={summarizingChatId === chat.id}
                             key={chat.id}
                             onDelete={(chatId) => {
                               setDeleteId(chatId);
                               setShowDeleteDialog(true);
                             }}
+                            onSummarize={handleSummarize}
                             setOpenMobile={setOpenMobile}
                           />
                         ))}
@@ -299,11 +354,13 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
                           <ChatItem
                             chat={chat}
                             isActive={chat.id === id}
+                            isSummarizing={summarizingChatId === chat.id}
                             key={chat.id}
                             onDelete={(chatId) => {
                               setDeleteId(chatId);
                               setShowDeleteDialog(true);
                             }}
+                            onSummarize={handleSummarize}
                             setOpenMobile={setOpenMobile}
                           />
                         ))}
@@ -319,11 +376,13 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
                           <ChatItem
                             chat={chat}
                             isActive={chat.id === id}
+                            isSummarizing={summarizingChatId === chat.id}
                             key={chat.id}
                             onDelete={(chatId) => {
                               setDeleteId(chatId);
                               setShowDeleteDialog(true);
                             }}
+                            onSummarize={handleSummarize}
                             setOpenMobile={setOpenMobile}
                           />
                         ))}

@@ -96,6 +96,9 @@ export type Dictionary = {
       deleteDialogTitle: string;
       deleteDialogDescription: string;
       deletedToast: string;
+      summarizedToast: string;
+      summarizeFailedToast: string;
+      summarizeUnavailableToast: string;
     };
     navigation: {
       openSidebar: string;
@@ -108,6 +111,8 @@ export type Dictionary = {
       allChatsDeleted: string;
       signOut: string;
       share: string;
+      summarize: string;
+      summarizing: string;
       more: string;
     };
     userNav: {
@@ -237,4 +242,8 @@ export type Dictionary = {
   };
 };
 
-export type TranslationValue = Dictionary | Dictionary[keyof Dictionary] | string | string[];
+export type TranslationValue =
+  | Dictionary
+  | Dictionary[keyof Dictionary]
+  | string
+  | string[];

@@ -68,14 +68,14 @@ export const zhCNDictionary: Dictionary = {
       commandsTitle: "命令",
       slashNew: "开始新聊天",
       slashClear: "清空当前聊天",
-      slashRename: "重命名当前聊天",
+      slashRename: "刷新聊天标题",
       slashModel: "切换 AI 模型",
       slashTheme: "切换深色/浅色模式",
       slashDelete: "删除当前聊天",
       slashPurge: "删除全部聊天",
       editingMessage: "正在编辑消息",
       editYourMessage: "编辑你的消息...",
-      renameAvailable: "重命名功能可在侧边栏聊天菜单中使用。",
+      renameAvailable: "请在侧边栏菜单中使用“对话总结”来刷新标题。",
       deleteThisChat: "删除这条聊天？",
       deleteThisChatConfirm: "删除",
       waitForModel: "请等待模型完成当前回复！",
@@ -99,6 +99,9 @@ export const zhCNDictionary: Dictionary = {
       deleteDialogDescription:
         "此操作无法撤销。该聊天将被永久删除，并从我们的服务器中移除。",
       deletedToast: "聊天已删除",
+      summarizedToast: "聊天标题已更新",
+      summarizeFailedToast: "更新聊天标题失败",
+      summarizeUnavailableToast: "这条聊天没有足够的文本可用于总结。",
     },
     navigation: {
       openSidebar: "打开侧边栏",
@@ -112,6 +115,8 @@ export const zhCNDictionary: Dictionary = {
       allChatsDeleted: "已删除全部聊天",
       signOut: "退出登录",
       share: "共享",
+      summarize: "对话总结",
+      summarizing: "总结中...",
       more: "更多",
     },
     userNav: {
@@ -182,8 +187,7 @@ export const zhCNDictionary: Dictionary = {
     },
     gateway: {
       activateTitle: "激活 AI Gateway",
-      activateDescriptionOwner:
-        "此应用需要站点所有者激活 Vercel AI Gateway。",
+      activateDescriptionOwner: "此应用需要站点所有者激活 Vercel AI Gateway。",
       activateDescriptionSelf: "此应用需要你激活 Vercel AI Gateway。",
     },
     artifact: {

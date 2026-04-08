@@ -538,7 +538,7 @@ export async function updateChatTitleById({
   try {
     return await db.update(chat).set({ title }).where(eq(chat.id, chatId));
   } catch (_error) {
-    return;
+    return null;
   }
 }
 

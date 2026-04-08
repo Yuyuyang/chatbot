@@ -68,14 +68,15 @@ export const enDictionary: Dictionary = {
       commandsTitle: "Commands",
       slashNew: "Start a new chat",
       slashClear: "Clear current chat",
-      slashRename: "Rename current chat",
+      slashRename: "Refresh the chat title",
       slashModel: "Change the AI model",
       slashTheme: "Toggle dark/light mode",
       slashDelete: "Delete current chat",
       slashPurge: "Delete all chats",
       editingMessage: "Editing message",
       editYourMessage: "Edit your message...",
-      renameAvailable: "Rename is available from the sidebar chat menu.",
+      renameAvailable:
+        "Use “Summarize chat” from the sidebar menu to refresh the title.",
       deleteThisChat: "Delete this chat?",
       deleteThisChatConfirm: "Delete",
       waitForModel: "Please wait for the model to finish its response!",
@@ -99,6 +100,10 @@ export const enDictionary: Dictionary = {
       deleteDialogDescription:
         "This action cannot be undone. This will permanently delete your chat and remove it from our servers.",
       deletedToast: "Chat deleted",
+      summarizedToast: "Chat title updated",
+      summarizeFailedToast: "Failed to update chat title",
+      summarizeUnavailableToast:
+        "This chat doesn't have enough text to summarize.",
     },
     navigation: {
       openSidebar: "Open sidebar",
@@ -112,6 +117,8 @@ export const enDictionary: Dictionary = {
       allChatsDeleted: "All chats deleted",
       signOut: "Sign out",
       share: "Share",
+      summarize: "Summarize chat",
+      summarizing: "Summarizing...",
       more: "More",
     },
     userNav: {
@@ -191,7 +198,8 @@ export const enDictionary: Dictionary = {
       failedExecuteAction: "Failed to execute action",
       sharedChatViewNotSupported:
         "Viewing files in shared chats is currently not supported.",
-      usefulForText: "Useful for text content, like drafting essays and emails.",
+      usefulForText:
+        "Useful for text content, like drafting essays and emails.",
       usefulForCode:
         "Useful for code generation; code execution is only available for Python code.",
       usefulForSheet: "Useful for working with spreadsheets",
